@@ -6,7 +6,7 @@
       </div>
       <div class="col-sm-2">
         <button
-          @click="exibirFormulario = !exibirFormulario"
+          @click="exibirFormularioCriarTarefa"
           class="btn btn-primary float-right"
         >
           <i class="fa fa-plus mr-2"></i>
@@ -21,6 +21,9 @@
         :key="tarefa.id"
         :tarefa="tarefa"
         @editar="selecionarTarefa"
+        @deletar="deletarTarefa"
+        @concluir="editarTarefa"
+
       />
     </ul>
 
@@ -72,6 +75,25 @@ export default {
                 this.resetar()
             })
     },
+    deletarTarefa(tarefa) {
+        const confirmar = window.confirm(`Deseja deletar a tarefa "${tarefa.titulo}"`)
+        if(confirmar) {
+            axios.delete(`${config.apiURL}/tarefas/${tarefa.id}`)
+                .then(r => {
+                    console.log(r)
+
+                    const indice = this.tarefas.findIndex(t => t.id === tarefa.id)
+                    this.tarefas.splice(indice, 1)
+                })
+        }
+    },
+    exibirFormularioCriarTarefa() {
+        if(this.tarefaSelecionada) {
+            this.tarefaSelecionada = undefined
+            return
+        }
+        this.exibirFormulario = !this.exibirFormulario
+    },  
     resetar() {
         this.tarefaSelecionada = undefined
         this.exibirFormulario = false

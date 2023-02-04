@@ -7,13 +7,8 @@
     },
     {
       "titulo": "Aprender Vueeee",
-      "concluido": true,
-      "id": 2
-    },
-    {
-      "titulo": "Aprender Axiossss",
       "concluido": false,
-      "id": 3
+      "id": 2
     },
     {
       "titulo": "Aprender Teste",
