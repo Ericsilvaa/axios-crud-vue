@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <ul class="list-group" v-if="tarefas.length > 0">
+    <ul class="list-group" v-if="tarefasOrdenadas.length > 0">
       <TarefasListaIten
         v-for="tarefa in tarefasOrdenadas"
         :key="tarefa.id"
@@ -27,7 +27,9 @@
       />
     </ul>
 
-    <p v-else>Nenhuma tarefa criada.</p>
+    <p v-else-if="!mensagemErro">Nenhuma tarefa criada.</p>
+
+    <div class="alert alert-gander" v-else>{{ mensagemErro }}</div>
 
     <TarefaSalvar
       v-if="exibirFormulario"
@@ -39,9 +41,8 @@
 </template>
 
 <script>
-import axios from "axios";
+import axios from "@/axios";
 
-import config from "@/config/config";
 import TarefaSalvar from "./TarefaSalvar.vue";
 import TarefasListaIten from "./TarefasListaIten.vue";
 
@@ -55,11 +56,12 @@ export default {
       tarefas: [],
       exibirFormulario: false,
       tarefaSelecionada: undefined,
+      tarefaSelecionada : undefined,
     };
   },
   computed: {
     tarefasOrdenadas() {
-        return this.tarefas.sort((t1, t2) => {
+        return this.tarefas.slice().sort((t1, t2) => {
             if(t1.concluido === t2.concluido) {
                 return t1.titulo < t2.titulo 
                     ? -1 
@@ -73,14 +75,14 @@ export default {
   },
   methods: {
     criarTarefa(tarefa) {
-      axios.post(`${config.apiURL}/tarefas`, tarefa)
+      axios.post(`/tarefas`, tarefa)
         .then((r) => {
             this.tarefas.push(r.data);
             this.resetar()
       });
     },
     editarTarefa(tarefa) {
-        axios.put(`${config.apiURL}/tarefas/${tarefa.id}`, tarefa)
+        axios.put(`/tarefas/${tarefa.id}`, tarefa)
             .then(r => {
                 console.log(r.data)
                 // encontrar indice da tarefa 
@@ -92,7 +94,7 @@ export default {
     deletarTarefa(tarefa) {
         const confirmar = window.confirm(`Deseja deletar a tarefa "${tarefa.titulo}"`)
         if(confirmar) {
-            axios.delete(`${config.apiURL}/tarefas/${tarefa.id}`)
+            axios.delete(`/tarefas/${tarefa.id}`)
                 .then(r => {
                     console.log(r)
 
@@ -118,10 +120,24 @@ export default {
     },
   },
   created() {
-    axios.get(`${config.apiURL}/tarefas`)
+    axios.get(`/tarefas`)
         .then((r) => {
             this.tarefas = r.data;
-    });
+        }).catch(error =>{
+            if (error.response) {
+                // Enviei req -> recebi a res <-> res.error [acima do 299]
+                this.mensagemErro = `Servidor retornou um erro: 
+                    ${error.message} ${error.response.statusText}s`
+            } else if(error.request) {
+                // montei & enviei server <-> ñ recebo res do server
+                this.mensagemErro = `Erro ao tentar comunicar com o servidor:
+                    ${error.message}`
+            } else {
+                // fiz req -> erro ao fzr req
+                this.mensagemErro = `Erro ao fazer requisição ao servidor: 
+                    ${error.message }`
+            }
+        })
   },
 };
 </script>
