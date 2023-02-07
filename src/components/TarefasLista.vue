@@ -91,16 +91,25 @@ export default {
                 this.resetar()
             })
     },
-    deletarTarefa(tarefa) {
+    async deletarTarefa(tarefa) {
         const confirmar = window.confirm(`Deseja deletar a tarefa "${tarefa.titulo}"`)
         if(confirmar) {
-            axios.delete(`/tarefas/${tarefa.id}`)
-                .then(r => {
-                    console.log(r)
+            // axios.delete(`/tarefas/${tarefa.id}`)
+            //     .then(r => {
+            //         console.log(r)
 
-                    const indice = this.tarefas.findIndex(t => t.id === tarefa.id)
-                    this.tarefas.splice(indice, 1)
-                })
+            //         const indice = this.tarefas.findIndex(t => t.id === tarefa.id)
+            //         this.tarefas.splice(indice, 1)
+            //     })
+          
+          try {
+            const r = await axios.delete(`/tarefas/${tarefa.id}`)
+            console.log(r)
+            const indice = this.tarefas.findIndex(t => t.id === tarefa.id)
+            this.tarefas.splice(indice, 1)  
+          } catch (error) {
+            console.log(error)
+          }
         }
     },
     exibirFormularioCriarTarefa() {
